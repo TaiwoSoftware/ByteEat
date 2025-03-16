@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'fredoka';
+    src: url('./components/secondFont/SF-Pro-Display-Regular.ttf');
+}
+
+html {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.new {
+    font-family: cursive;
+}
