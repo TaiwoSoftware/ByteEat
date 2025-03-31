@@ -34,12 +34,13 @@ export const LandingPage = () => {
           Makes you fall in love
         </h1>
 
-        <div className="grid grid-cols-2 gap-4 w-full">
-          <div className="p-7">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full p-6">
+          {/* Sidebar Section */}
+          <div className="p-7 space-y-6">
             <SidebarList
               children={
                 <div className="flex items-center justify-center p-4 rounded-full bg-gradient-to-r from-orange-500 to-red-600 shadow-lg">
-                  <GiHotMeal className="text-white text-8xl drop-shadow-lg animate-pulse" />
+                  <GiHotMeal className="text-white text-6xl drop-shadow-lg animate-pulse" />
                 </div>
               }
               title="Meal"
@@ -47,7 +48,7 @@ export const LandingPage = () => {
             <SidebarList
               children={
                 <div className="flex items-center justify-center p-6 rounded-full bg-gradient-to-b from-red-700 to-red-500 shadow-xl">
-                  <GiWineBottle className="text-white text-8xl drop-shadow-lg filter brightness-110 animate-bounce" />
+                  <GiWineBottle className="text-white text-6xl drop-shadow-lg filter brightness-110 animate-bounce" />
                 </div>
               }
               title="Beverages"
@@ -55,12 +56,14 @@ export const LandingPage = () => {
             <SidebarList
               children={
                 <div className="flex items-center justify-center p-4 rounded-full bg-gradient-to-r from-orange-500 to-red-600 shadow-lg">
-                  <GiCheeseWedge className="text-white text-8xl drop-shadow-lg animate-pulse" />
+                  <GiCheeseWedge className="text-white text-6xl drop-shadow-lg animate-pulse" />
                 </div>
               }
               title="Appetizers"
             />
           </div>
+
+          {/* Meal Grid Section */}
           <div className="p-7">
             <MealGrid />
           </div>

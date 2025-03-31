@@ -1,15 +1,20 @@
-interface SiderbarListProps {
+import { ReactNode } from "react";
+
+interface SidebarListProps {
   children: ReactNode;
   title: string;
 }
-import { ReactNode } from "react";
-export const SidebarList = ({ children, title }: SiderbarListProps) => {
+
+export const SidebarList = ({ children, title }: SidebarListProps) => {
   return (
-    <div className="flex items-center gap-3 mt-4 ">
-        {children}
-      <div>
-        <p className="text-2xl font-bold font-fredoka">{title}</p>
-      </div>
+    <div className="flex items-center gap-5 mt-6 transition-transform transform hover:scale-105 cursor-pointer">
+      {/* Icon with Gradient Background */}
+      <div className="p-4 rounded-full shadow-lg">{children}</div>
+
+      {/* Sidebar Title */}
+      <p className="text-xl font-semibold text-gray-800 font-fredoka">
+        {title}
+      </p>
     </div>
   );
 };
