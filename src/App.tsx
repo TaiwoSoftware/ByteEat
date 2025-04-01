@@ -8,6 +8,7 @@ import { ErrorPage } from "./components/Error/ErrorPage";
 import { About } from "./components/About/About";
 import { Contact } from "./components/Contact/Contact";
 import { NewUser } from "./components/Auth/NewUser";
+// import Footer from "./components/landing_page/Footer";
 export const App = () => {
   return (
     <>
@@ -22,6 +23,7 @@ export const App = () => {
           <Route path="/newUser" element={<NewUser />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
+        {/* <Footer /> */}
       </Router>
     </>
   );
