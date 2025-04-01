@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -9,7 +10,7 @@ const API_URL_DRINKS =
 export const MealGrid = () => {
   const [meals, setMeals] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [category, setCategory] = useState<string>("meals"); // Track the selected category
+  const [category,] = useState<string>("meals"); // Track the selected category
 
   useEffect(() => {
     const fetchData = async () => {
