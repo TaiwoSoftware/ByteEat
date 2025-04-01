@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 
-export const NewUser = () => {
+export const Login = () => {
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
-    phone: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,33 +15,17 @@ export const NewUser = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form submitted:", formData);
+    // Handle login logic here
+    console.log("Login submitted:", formData);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-10">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
         <h2 className="text-3xl font-semibold text-center text-orange-600 mb-6">
-          Create Your Account
+          Login to Your Account
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name Field */}
-          <div>
-            <label htmlFor="name" className="text-lg font-medium text-gray-700 mb-2 block">
-              Full Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-2 text-gray-900 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
-
           {/* Email Field */}
           <div>
             <label htmlFor="email" className="text-lg font-medium text-gray-700 mb-2 block">
@@ -76,36 +58,20 @@ export const NewUser = () => {
             />
           </div>
 
-          {/* Phone Number Field */}
-          <div>
-            <label htmlFor="phone" className="text-lg font-medium text-gray-700 mb-2 block">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              required
-              className="w-full px-4 py-2 text-gray-900 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-          </div>
-
           {/* Submit Button */}
           <div>
             <button
               type="submit"
               className="w-full py-3 bg-orange-600 text-white rounded-full font-medium hover:bg-orange-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
             >
-              Register & Order
+              Log In
             </button>
           </div>
         </form>
         <p className="text-center text-gray-600 mt-4">
-          Already have an account?{" "}
-          <a href="/login" className="text-orange-600 hover:underline">
-            Log in here
+          Don't have an account?{" "}
+          <a href="/register" className="text-orange-600 hover:underline">
+            Create one here
           </a>
         </p>
       </div>

@@ -41,7 +41,7 @@ export const Navbar = () => {
                 <BiCart className="text-3xl  text-white" />
               </div>
             </Link>
-            <Link to={"/profile"}>
+            <Link to={"/user"}>
               <div className="bg-[#a82f17] text-center w-11 p-2 rounded-full">
                 <IoMdLogIn className="text-3xl  text-white" />
               </div>

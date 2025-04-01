@@ -8,7 +8,9 @@ import { ErrorPage } from "./components/Error/ErrorPage";
 import { About } from "./components/About/About";
 import { Contact } from "./components/Contact/Contact";
 import { NewUser } from "./components/Auth/NewUser";
-// import Footer from "./components/landing_page/Footer";
+import Footer from "./components/landing_page/Footer";
+import { Login } from "./components/Auth/Login";
+import { Shop } from "./components/Shop/Shop";
 export const App = () => {
   return (
     <>
@@ -20,10 +22,12 @@ export const App = () => {
           <Route path="/cart" element={<Cart />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/newUser" element={<NewUser />} />
+          <Route path="/user" element={<NewUser />} />
+          <Route path="/login" element={<Login />} />
           <Route path="*" element={<ErrorPage />} />
+          <Route path="/shop" element={<Shop />} />
         </Routes>
-        {/* <Footer /> */}
+        <Footer />
       </Router>
     </>
   );
