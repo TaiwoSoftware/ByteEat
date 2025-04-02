@@ -26,7 +26,7 @@ export const Shop = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 md:px-12">
-      <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-12">Our Delicious Meals</h1>
+      <h1 className="text-4xl font-fredoka font-extrabold text-center text-gray-800 mb-12">Our Delicious Meals</h1>
 
       {loading ? (
         <div className="flex justify-center items-center">

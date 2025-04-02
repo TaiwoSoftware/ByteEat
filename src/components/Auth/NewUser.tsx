@@ -1,24 +1,67 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from './supabaseClient';
+import { FormData } from './typeUser';
 
-export const NewUser = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
+export const NewUser: React.FC = () => {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    password: '',
+    location: '',
+    phoneNumber: '',
+    confirmPassword: '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSignUp = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form submitted:", formData);
+    setLoading(true);
+    setError('');
+
+    // Validate passwords
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match!');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            location: formData.location,
+            phone_number: formData.phoneNumber,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+      if (!data?.user) throw new Error('User signup failed');
+
+      console.log('User registered successfully:', data.user.id);
+      navigate('/login');
+    } catch (err) {
+      console.error('Error:', err);
+      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,8 +70,10 @@ export const NewUser = () => {
         <h2 className="text-3xl font-semibold text-center text-orange-600 mb-6">
           Create Your Account
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name Field */}
+
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+        <form onSubmit={handleSignUp} className="space-y-6">
           <div>
             <label htmlFor="name" className="text-lg font-medium text-gray-700 mb-2 block">
               Full Name
@@ -44,7 +89,6 @@ export const NewUser = () => {
             />
           </div>
 
-          {/* Email Field */}
           <div>
             <label htmlFor="email" className="text-lg font-medium text-gray-700 mb-2 block">
               Email Address
@@ -60,7 +104,37 @@ export const NewUser = () => {
             />
           </div>
 
-          {/* Password Field */}
+          <div>
+            <label htmlFor="location" className="text-lg font-medium text-gray-700 mb-2 block">
+              Location
+            </label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              value={formData.location}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 text-gray-900 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="phoneNumber" className="text-lg font-medium text-gray-700 mb-2 block">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
+              required
+              pattern="[0-9]*"
+              className="w-full px-4 py-2 text-gray-900 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+
           <div>
             <label htmlFor="password" className="text-lg font-medium text-gray-700 mb-2 block">
               Password
@@ -76,34 +150,36 @@ export const NewUser = () => {
             />
           </div>
 
-          {/* Phone Number Field */}
           <div>
-            <label htmlFor="phone" className="text-lg font-medium text-gray-700 mb-2 block">
-              Phone Number
+            <label htmlFor="confirmPassword" className="text-lg font-medium text-gray-700 mb-2 block">
+              Confirm Password
             </label>
             <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
               onChange={handleInputChange}
               required
               className="w-full px-4 py-2 text-gray-900 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
-          {/* Submit Button */}
           <div>
             <button
               type="submit"
-              className="w-full py-3 bg-orange-600 text-white rounded-full font-medium hover:bg-orange-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+              disabled={loading}
+              className={`w-full py-3 text-white rounded-full font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'
+              }`}
             >
-              Register & Order
+              {loading ? 'Creating Account...' : 'Register & Order'}
             </button>
           </div>
         </form>
+
         <p className="text-center text-gray-600 mt-4">
-          Already have an account?{" "}
+          Already have an account?{' '}
           <a href="/login" className="text-orange-600 hover:underline">
             Log in here
           </a>
