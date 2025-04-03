@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "../Auth/supabaseClient";
+import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 
 interface User {
@@ -9,13 +9,29 @@ interface User {
   created_at: string;
 }
 
-const Sidebar: React.FC = () => {
+interface Order {
+  id: number;
+  created_at: string;
+  total_price: number;
+  items: Array<{
+    image: string;
+    price: number;
+    title:string;
+    quantity: number;
+  }>;
+}
+
+const Sidebar: React.FC<{ ordersCount: number }> = ({ ordersCount }) => {
   return (
     <div className="sidebar bg-gray-800 text-white w-64 p-5">
       <h2 className="text-xl font-semibold mb-4">User Dashboard</h2>
       <ul>
         <li><a href="#profile" className="block py-2">Profile</a></li>
-        <li><a href="#orders" className="block py-2">Orders</a></li>
+        <li>
+          <a href="#orders" className="block py-2">
+            Orders ({ordersCount})
+          </a>
+        </li>
         <li><a href="#settings" className="block py-2">Settings</a></li>
         <li><a href="#logout" className="block py-2">Logout</a></li>
       </ul>
@@ -25,10 +41,12 @@ const Sidebar: React.FC = () => {
 
 export const Profile: React.FC = () => {
   const [userData, setUserData] = useState<User | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [newEmail, setNewEmail] = useState<string>("");
-  const [newPassword, setNewPassword] = useState<string>("");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [ordersCount, setOrdersCount] = useState<number>(0); // Total count of items
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,6 +68,27 @@ export const Profile: React.FC = () => {
         created_at: data.user.created_at!,
       });
 
+      // Fetch orders placed by the user
+      const { data: ordersData, error: ordersError } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("user_id", data.user.id);
+
+      if (ordersError) {
+        console.error("Error fetching orders:", ordersError);
+        setError("Error fetching orders");
+      } else {
+        setOrders(ordersData || []);
+        
+        // Count the total number of items across all orders
+        const totalItems = ordersData?.reduce(
+          (acc, order) => acc + (order.items?.length || 0),
+          0
+        ) || 0;
+
+        setOrdersCount(totalItems); // Update the orders count with total item count
+      }
+
       setLoading(false);
     };
 
@@ -65,24 +104,14 @@ export const Profile: React.FC = () => {
     navigate("/user");
   };
 
-  const handleUpdateEmail = async () => {
-    const { error } = await supabase.auth.updateUser({ email: newEmail });
-    if (error) return alert(error.message);
-    alert("Email updated! Check your inbox for confirmation.");
-    setUserData((prev) => prev && { ...prev, email: newEmail });
+  const handleOrderClick = (order: Order) => {
+    setSelectedOrder(order);
+    setModalVisible(true);
   };
 
-  const handleUpdatePassword = async () => {
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) return alert(error.message);
-    alert("Password updated successfully.");
-  };
-
-  const handleDeleteAccount = async () => {
-    const { error } = await supabase.auth.admin.deleteUser(userData!.id);
-    if (error) return alert(error.message);
-    alert("Account deleted.");
-    navigate("/user");
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedOrder(null);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -90,7 +119,7 @@ export const Profile: React.FC = () => {
 
   return (
     <div className="flex">
-      <Sidebar />
+      <Sidebar ordersCount={ordersCount} /> {/* Pass the updated order count */}
 
       <div className="profile-container flex-1 p-10 bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
@@ -99,78 +128,83 @@ export const Profile: React.FC = () => {
           </h2>
 
           {userData ? (
-            <div className="space-y-6">
-              <div>
+            <div>
+              <div className="space-y-6">
                 <h3 className="text-xl font-medium text-gray-700">User ID:</h3>
                 <p className="text-gray-900">{userData.id}</p>
-              </div>
-              <div>
                 <h3 className="text-xl font-medium text-gray-700">Email:</h3>
                 <p className="text-gray-900">{userData.email}</p>
-              </div>
-              <div>
                 <h3 className="text-xl font-medium text-gray-700">Account Created:</h3>
                 <p className="text-gray-900">
                   {new Date(userData.created_at).toLocaleDateString()}
                 </p>
               </div>
-
-              {/* Update Email */}
-              <div className="space-y-2">
-                <h3 className="text-xl font-medium text-gray-700">Update Email:</h3>
-                <input
-                  type="email"
-                  placeholder="Enter new email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                />
-                <button
-                  onClick={handleUpdateEmail}
-                  className="w-full bg-blue-500 text-white p-2 rounded-md"
-                >
-                  Update Email
-                </button>
-              </div>
-
-              {/* Update Password */}
-              <div className="space-y-2">
-                <h3 className="text-xl font-medium text-gray-700">Update Password:</h3>
-                <input
-                  type="password"
-                  placeholder="Enter new password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                />
-                <button
-                  onClick={handleUpdatePassword}
-                  className="w-full bg-green-500 text-white p-2 rounded-md"
-                >
-                  Update Password
-                </button>
-              </div>
-
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="w-full bg-red-500 text-white p-2 rounded-md"
-              >
-                Logout
-              </button>
-
-              {/* Delete Account Button */}
-              <button
-                onClick={handleDeleteAccount}
-                className="w-full bg-gray-700 text-white p-2 rounded-md"
-              >
-                Delete Account
-              </button>
             </div>
           ) : (
             <p className="text-red-500">User data not found</p>
           )}
+
+          <h3 className="mt-6 text-2xl">Orders</h3>
+          {orders.length === 0 ? (
+            <p>No orders placed yet.</p>
+          ) : (
+            <div className="orders-list mt-4">
+              {orders.map((order) => (
+                <div
+                  key={order.id}
+                  className="order-item border p-4 mb-4 rounded-lg cursor-pointer"
+                  onClick={() => handleOrderClick(order)}
+                >
+                  <p className="font-semibold">Order ID: {order.id}</p>
+                  <p className="text-gray-600">
+                    Order Date: {new Date(order.created_at).toLocaleDateString()}
+                  </p>
+                  <p className="font-bold">Total: ${order.total_price.toFixed(2)}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="mt-4 w-full bg-red-500 text-white py-2 rounded-md"
+          >
+            Logout
+          </button>
         </div>
+
+        {/* Order Details Modal */}
+        {modalVisible && selectedOrder && (
+          <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+            <div className="bg-white p-8 rounded-lg w-96">
+              <h3 className="text-2xl font-semibold mb-4">Order Details</h3>
+              <p className="text-lg mb-4">Order ID: {selectedOrder.id}</p>
+              <p className="text-lg mb-4">Order Date: {new Date(selectedOrder.created_at).toLocaleDateString()}</p>
+              <p className="text-lg mb-4">Total: ${selectedOrder.total_price.toFixed(2)}</p>
+
+              <div className="items">
+                <h4 className="font-semibold">Items:</h4>
+                <ul>
+                  {selectedOrder.items.map((item, index) => (
+                    <li key={index} className="flex justify-between">
+                      <span>
+                        {item.quantity} x ${item.price.toFixed(2)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                onClick={closeModal}
+                className="mt-4 w-full bg-gray-500 text-white py-2 rounded-md"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

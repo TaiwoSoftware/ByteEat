@@ -33,7 +33,8 @@ export const Shop = () => {
       price: Math.floor(Math.random() * (20 - 10 + 1)) + 100, // Simulated price
       quantity: 1,
     };
-    addToCart(cartItem); // Add item to cart context
+    addToCart(cartItem);
+    alert("Added to cart") // Add item to cart context
   };
 
   return (
