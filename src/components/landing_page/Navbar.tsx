@@ -29,7 +29,7 @@ export const Navbar = () => {
       navigate("/profile");
     } else {
       // If user is not authenticated, navigate to login page
-      navigate("/user");
+      navigate("/select`");
     }
   };
 

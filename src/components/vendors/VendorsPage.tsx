@@ -173,7 +173,7 @@ export const VendorsPage = () => {
             <div className="mt-6 flex gap-4">
               <button
                 type="submit"
-                className="w-full bg-orange-600 text-white py-3 rounded-lg shadow-md hover:bg-orange-700 transition-transform transform hover:scale-105"
+                className="w-full    text-white py-3 rounded-lg shadow-md hover:bg-orange-700 transition-transform transform hover:scale-105"
                 disabled={loading}
               >
                 {loading ? "Creating..." : "Create Vendor Page"}
