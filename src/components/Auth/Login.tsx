@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import { FormData } from './auth';
@@ -12,6 +12,18 @@ export const Login: React.FC = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+
+  // Check if the user is already authenticated on component mount
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // If the user is authenticated, redirect to the profile page
+        navigate('/profile');
+      }
+    };
+    checkUser();
+  }, [navigate]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
@@ -35,7 +47,8 @@ export const Login: React.FC = () => {
       if (error) throw error;
 
       console.log('User logged in:', data.user);
-      navigate('/shop');
+      // Redirect to profile after successful login
+      navigate('/profile');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
     } finally {

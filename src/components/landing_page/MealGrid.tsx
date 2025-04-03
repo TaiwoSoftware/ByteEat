@@ -59,7 +59,7 @@ export const MealGrid = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-orange-400">
                     {/* Displaying a simulated price */}
-                    ${Math.floor(Math.random() * (20 - 10 + 1)) + 10}
+                    ${Math.floor(Math.random() * (20 - 10 + 1)) + 100}
                   </span>
                   <button className="px-4 py-2 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition-all duration-300 hover:scale-105 flex items-center gap-2 text-sm">
                     Order Now

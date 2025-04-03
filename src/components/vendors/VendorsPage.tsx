@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../Auth/supabaseClient"; // Make sure to import your supabaseClient
 import background from "../Images/tasty-pakistani-dish-top-view.jpg";
+import { useNavigate } from "react-router-dom";
 
 export const VendorsPage = () => {
   const [showForm, setShowForm] = useState(false);
@@ -10,6 +11,8 @@ export const VendorsPage = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -19,78 +22,69 @@ export const VendorsPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Get the authenticated user using the new auth method
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       alert("You must be logged in to create a vendor page.");
+      setLoading(false);
       return;
     }
 
     try {
       let logoUrl: string | null = null;
-
-      // Upload logo file if available
       if (logoFile) {
         const fileName = `${Date.now()}-${logoFile.name}`;
-        const { error: uploadError } = await supabase
-          .storage
+        const { error: uploadError } = await supabase.storage
           .from("vendors-logos")
           .upload(fileName, logoFile);
 
         if (uploadError) {
           console.error("File upload error:", uploadError);
           alert("File upload failed: " + uploadError.message);
+          setLoading(false);
           return;
         }
 
-        // Get the public URL of the uploaded logo.
-        // For supabase-js v2, use publicUrl instead of publicURL.
-        const { data: publicUrlData } = supabase
-          .storage
+        const { data: publicUrlData } = supabase.storage
           .from("vendors-logos")
           .getPublicUrl(fileName);
         logoUrl = publicUrlData.publicUrl;
       }
 
-      // Insert vendor information including the user_id into the 'vendors' table.
-      const { error: insertError } = await supabase
-        .from("vendors")
-        .insert([
-          {
-            name,
-            category,
-            email,
-            phone,
-            address,
-            logo_url: logoUrl, // Store the URL of the uploaded logo (should not be null)
-            user_id: user.id,  // Link this vendor to the authenticated user
-          },
-        ]);
+      const { error: insertError } = await supabase.from("vendors").insert([
+        {
+          name,
+          category,
+          email,
+          phone,
+          address,
+          logo_url: logoUrl,
+          user_id: user.id,
+        },
+      ]);
 
       if (insertError) throw insertError;
 
       alert("Vendor created successfully");
-      setShowForm(false); // Close the form after submission
+      navigate("/vendors-dashboard");
+      setShowForm(false);
     } catch (error) {
       console.error("Error creating vendor:", error);
       alert("There was an error creating the vendor.");
     }
+    setLoading(false);
   };
 
   return (
     <div
       className="relative min-h-screen flex flex-col items-center justify-center bg-cover bg-center px-4"
-      style={{
-        backgroundImage: `url(${background})`, // Background Image
-      }}
+      style={{ backgroundImage: `url(${background})` }}
     >
-      {/* Background Overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-
-      {/* Content (Make sure it's above the overlay) */}
       <div className="relative z-10 text-center">
-        {/* Create Page Button */}
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
@@ -99,8 +93,6 @@ export const VendorsPage = () => {
             Create your page
           </button>
         )}
-
-        {/* Vendor Form (Appears on Button Click) */}
         {showForm && (
           <form
             onSubmit={handleSubmit}
@@ -109,8 +101,6 @@ export const VendorsPage = () => {
             <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">
               Create Your Vendor Page
             </h2>
-
-            {/* Business Name */}
             <div>
               <label className="block font-medium text-gray-700">
                 Business Name
@@ -119,12 +109,10 @@ export const VendorsPage = () => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                className="w-full border rounded-lg px-4 py-2"
                 required
               />
             </div>
-
-            {/* Business Category */}
             <div className="mt-4">
               <label className="block font-medium text-gray-700">
                 Category
@@ -132,7 +120,7 @@ export const VendorsPage = () => {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500"
+                className="w-full border rounded-lg px-4 py-2"
                 required
               >
                 <option>Breakfast</option>
@@ -140,31 +128,26 @@ export const VendorsPage = () => {
                 <option>Dinner</option>
               </select>
             </div>
-
-            {/* Contact Details */}
             <div className="mt-4">
               <label className="block font-medium text-gray-700">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                className="w-full border rounded-lg px-4 py-2"
                 required
               />
             </div>
-
             <div className="mt-4">
               <label className="block font-medium text-gray-700">Phone</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                className="w-full border rounded-lg px-4 py-2"
                 required
               />
             </div>
-
-            {/* Business Address */}
             <div className="mt-4">
               <label className="block font-medium text-gray-700">
                 Business Address
@@ -173,12 +156,10 @@ export const VendorsPage = () => {
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                className="w-full border rounded-lg px-4 py-2"
                 required
               />
             </div>
-
-            {/* Upload Logo */}
             <div className="mt-4">
               <label className="block font-medium text-gray-700">
                 Business Logo
@@ -186,18 +167,18 @@ export const VendorsPage = () => {
               <input
                 type="file"
                 onChange={handleFileChange}
-                className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                className="w-full border rounded-lg px-4 py-2"
               />
             </div>
-
-            {/* Submit & Cancel Buttons */}
             <div className="mt-6 flex gap-4">
               <button
                 type="submit"
                 className="w-full bg-orange-600 text-white py-3 rounded-lg shadow-md hover:bg-orange-700 transition-transform transform hover:scale-105"
+                disabled={loading}
               >
-                Create Vendor Page
+                {loading ? "Creating..." : "Create Vendor Page"}
               </button>
+              ;
               <button
                 type="button"
                 onClick={() => setShowForm(false)}

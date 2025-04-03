@@ -1,14 +1,37 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Logo } from "../Logo";
 import { BiCart } from "react-icons/bi";
 import { NavLinks } from "./NavLinks";
 import { IoMdLogIn } from "react-icons/io";
 import { RiArrowDropDownLine } from "react-icons/ri";
+import { FaUser } from "react-icons/fa"; // User icon from react-icons
+import { supabase } from "../Auth/supabaseClient"; // Assuming you have this file set up for Supabase client
 
 export const Navbar = () => {
   const [servicesOpen, setServicesOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if the user is authenticated on page load
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+  }, []);
+
+  const handleUserIconClick = () => {
+    if (user) {
+      // If user is authenticated, navigate to the profile page
+      navigate("/profile");
+    } else {
+      // If user is not authenticated, navigate to login page
+      navigate("/user");
+    }
+  };
 
   return (
     <>
@@ -31,7 +54,6 @@ export const Navbar = () => {
             </button>
             {servicesOpen && (
               <div className="absolute top-full left-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2 z-50">
-               
                 <Link to="/delivery" className="block px-4 py-2 hover:bg-gray-100">
                   Delivery
                 </Link>
@@ -72,18 +94,23 @@ export const Navbar = () => {
         </div>
 
         <div className="flex gap-4 items-center">
-          {/* <Input type="search" placeholder="Search ByteEats" /> */}
+          {/* Cart */}
           <div className="flex gap-3">
             <Link to={"/cart"}>
               <div className="bg-[#a82f17] text-center w-11 p-2 rounded-full">
                 <BiCart className="text-3xl text-white" />
               </div>
             </Link>
-            <Link to={"/user"}>
-              <div className="bg-[#a82f17] text-center w-11 p-2 rounded-full">
+            <div
+              onClick={handleUserIconClick}
+              className="bg-[#a82f17] text-center w-11 p-2 rounded-full cursor-pointer"
+            >
+              {user ? (
+                <FaUser className="text-3xl text-white" />
+              ) : (
                 <IoMdLogIn className="text-3xl text-white" />
-              </div>
-            </Link>
+              )}
+            </div>
           </div>
         </div>
       </nav>

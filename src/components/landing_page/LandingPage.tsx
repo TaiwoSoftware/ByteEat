@@ -30,9 +30,11 @@ export const LandingPage = () => {
               Experience the finest cuisine delivered right to your doorstep.
               Fresh, hot, and made with love.
             </p>
-            <button className="mt-8 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white text-xl font-semibold rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
-              Place your order
-            </button>
+            <Link to={'/shop'}>
+              <button className="mt-8 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white text-xl font-semibold rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+                Place your order
+              </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -85,7 +87,7 @@ export const LandingPage = () => {
             <MealGrid />
           </div>
         </div>
-       
+
         <div className="text-center">
           <Link to={"/shop"}>
             <button className="py-3 px-8 bg-orange-600 text-white rounded-full font-semibold text-lg hover:bg-orange-700 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50 shadow-md">
