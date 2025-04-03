@@ -10,6 +10,7 @@ import { NewUser } from "./components/Auth/NewUser";
 import Footer from "./components/landing_page/Footer";
 import { Login } from "./components/Auth/Login";
 import { Shop } from "./components/Shop/Shop";
+import {VendorsPage} from "./components/vendors/VendorsPage"
 export const App = () => {
   return (
     <>
@@ -24,6 +25,7 @@ export const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<ErrorPage />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/vendor" element={<VendorsPage />} />
         </Routes>
         <Footer />
       </Router>

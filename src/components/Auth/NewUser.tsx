@@ -1,26 +1,26 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from './supabaseClient';
-import { FormData } from './typeUser';
+import React, { useState, ChangeEvent, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "./supabaseClient";
+import { FormData } from "./typeUser";
 
 export const NewUser: React.FC = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    password: '',
-    location: '',
-    phoneNumber: '',
-    confirmPassword: '',
+    name: "",
+    email: "",
+    password: "",
+    location: "",
+    phoneNumber: "",
+    confirmPassword: "",
   });
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -29,11 +29,11 @@ export const NewUser: React.FC = () => {
   const handleSignUp = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     // Validate passwords
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match!');
+      setError("Passwords do not match!");
       setLoading(false);
       return;
     }
@@ -52,13 +52,17 @@ export const NewUser: React.FC = () => {
       });
 
       if (authError) throw authError;
-      if (!data?.user) throw new Error('User signup failed');
+      if (!data?.user) throw new Error("User signup failed");
 
-      console.log('User registered successfully:', data.user.id);
-      navigate('/login');
+      console.log("User registered successfully:", data.user.id);
+      navigate("/login");
     } catch (err) {
-      console.error('Error:', err);
-      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
+      console.error("Error:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -75,7 +79,10 @@ export const NewUser: React.FC = () => {
 
         <form onSubmit={handleSignUp} className="space-y-6">
           <div>
-            <label htmlFor="name" className="text-lg font-medium text-gray-700 mb-2 block">
+            <label
+              htmlFor="name"
+              className="text-lg font-medium text-gray-700 mb-2 block"
+            >
               Full Name
             </label>
             <input
@@ -90,7 +97,10 @@ export const NewUser: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="email" className="text-lg font-medium text-gray-700 mb-2 block">
+            <label
+              htmlFor="email"
+              className="text-lg font-medium text-gray-700 mb-2 block"
+            >
               Email Address
             </label>
             <input
@@ -105,7 +115,10 @@ export const NewUser: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="location" className="text-lg font-medium text-gray-700 mb-2 block">
+            <label
+              htmlFor="location"
+              className="text-lg font-medium text-gray-700 mb-2 block"
+            >
               Location
             </label>
             <input
@@ -120,7 +133,10 @@ export const NewUser: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="phoneNumber" className="text-lg font-medium text-gray-700 mb-2 block">
+            <label
+              htmlFor="phoneNumber"
+              className="text-lg font-medium text-gray-700 mb-2 block"
+            >
               Phone Number
             </label>
             <input
@@ -136,7 +152,10 @@ export const NewUser: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="text-lg font-medium text-gray-700 mb-2 block">
+            <label
+              htmlFor="password"
+              className="text-lg font-medium text-gray-700 mb-2 block"
+            >
               Password
             </label>
             <input
@@ -151,7 +170,10 @@ export const NewUser: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="text-lg font-medium text-gray-700 mb-2 block">
+            <label
+              htmlFor="confirmPassword"
+              className="text-lg font-medium text-gray-700 mb-2 block"
+            >
               Confirm Password
             </label>
             <input
@@ -170,16 +192,18 @@ export const NewUser: React.FC = () => {
               type="submit"
               disabled={loading}
               className={`w-full py-3 text-white rounded-full font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
-                loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-orange-600 hover:bg-orange-700"
               }`}
             >
-              {loading ? 'Creating Account...' : 'Register & Order'}
+              {loading ? "Creating Account..." : "Register & Order"}
             </button>
           </div>
         </form>
 
         <p className="text-center text-gray-600 mt-4">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <a href="/login" className="text-orange-600 hover:underline">
             Log in here
           </a>
