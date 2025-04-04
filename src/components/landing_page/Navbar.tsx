@@ -29,7 +29,7 @@ export const Navbar = () => {
       navigate("/profile");
     } else {
       // If user is not authenticated, navigate to login page
-      navigate("/select`");
+      navigate("/select");
     }
   };
 
@@ -54,11 +54,8 @@ export const Navbar = () => {
             </button>
             {servicesOpen && (
               <div className="absolute top-full left-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2 z-50">
-                <Link to="/delivery" className="block px-4 py-2 hover:bg-gray-100">
-                  Delivery
-                </Link>
-                <Link to="/custom-orders" className="block px-4 py-2 hover:bg-gray-100">
-                  Custom Orders
+                <Link to="/shop" className="block px-4 py-2 hover:bg-gray-100">
+                  order
                 </Link>
               </div>
             )}
@@ -75,13 +72,13 @@ export const Navbar = () => {
             </button>
             {menuOpen && (
               <div className="absolute top-full left-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2 z-50">
-                <Link to="/breakfast" className="block px-4 py-2 hover:bg-gray-100">
+                <Link to="/shop" className="block px-4 py-2 hover:bg-gray-100">
                   Breakfast
                 </Link>
-                <Link to="/lunch" className="block px-4 py-2 hover:bg-gray-100">
+                <Link to="/shop" className="block px-4 py-2 hover:bg-gray-100">
                   Lunch
                 </Link>
-                <Link to="/dinner" className="block px-4 py-2 hover:bg-gray-100">
+                <Link to="/shop" className="block px-4 py-2 hover:bg-gray-100">
                   Dinner
                 </Link>
               </div>
@@ -89,7 +86,7 @@ export const Navbar = () => {
           </div>
 
           <NavLinks to="/profile" title="Profile" />
-          <NavLinks to="/newUser" title="Contact" />
+          <NavLinks to="/contact" title="Contact" />
           <NavLinks to="/vendor" title="Vendors Corner" />
         </div>
 

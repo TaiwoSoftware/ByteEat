@@ -17,3 +17,17 @@ html {
 .new {
     font-family: cursive;
 }
+
+@keyframes bounceWithDelay {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  
+  .custom-delay-1 {
+    animation: bounceWithDelay 0.8s ease-out 0.5s forwards;
+  }
+  
+  .custom-delay-2 {
+    animation: bounceWithDelay 0.8s ease-out 1s forwards;
+  }
+  

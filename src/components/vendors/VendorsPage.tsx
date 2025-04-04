@@ -69,7 +69,7 @@ export const VendorsPage = () => {
       if (insertError) throw insertError;
 
       alert("Vendor created successfully");
-      navigate("/vendors-dashboard");
+      navigate("/vendor_dashboard");
       setShowForm(false);
     } catch (error) {
       console.error("Error creating vendor:", error);
@@ -173,7 +173,7 @@ export const VendorsPage = () => {
             <div className="mt-6 flex gap-4">
               <button
                 type="submit"
-                className="w-full    text-white py-3 rounded-lg shadow-md hover:bg-orange-700 transition-transform transform hover:scale-105"
+                className="w-full    text-orange-700 hover:text-white py-3 rounded-lg shadow-md hover:bg-orange-700 transition-transform transform hover:scale-105"
                 disabled={loading}
               >
                 {loading ? "Creating..." : "Create Vendor Page"}

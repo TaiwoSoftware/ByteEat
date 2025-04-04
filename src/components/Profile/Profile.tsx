@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { supabase } from "../Auth/supabaseClient";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 
 interface User {
@@ -16,24 +17,53 @@ interface Order {
   items: Array<{
     image: string;
     price: number;
-    title:string;
+    title: string;
     quantity: number;
   }>;
 }
 
-const Sidebar: React.FC<{ ordersCount: number }> = ({ ordersCount }) => {
+interface CartItem {
+  title: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
+
+const Sidebar: React.FC = () => {
+  const [ordersCount, setOrdersCount] = useState<number>(0); // Total count of items in the cart
+
+  useEffect(() => {
+    // Fetch cart data from localStorage
+    const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    // Set the ordersCount to the length of the cart array
+    setOrdersCount(storedCart.length);
+  }, []);
+
   return (
     <div className="sidebar bg-gray-800 text-white w-64 p-5">
       <h2 className="text-xl font-semibold mb-4">User Dashboard</h2>
       <ul>
-        <li><a href="#profile" className="block py-2">Profile</a></li>
         <li>
-          <a href="#orders" className="block py-2">
-            Orders ({ordersCount})
+          <a href="#profile" className="block py-2">
+            Profile
           </a>
         </li>
-        <li><a href="#settings" className="block py-2">Settings</a></li>
-        <li><a href="#logout" className="block py-2">Logout</a></li>
+        <Link to={'/cart'}>
+          <li>
+            Cart ({ordersCount})
+          </li>
+        </Link>
+        <li>
+          <a href="#settings" className="block py-2">
+            Settings
+          </a>
+        </li>
+        <li>
+          <a href="#logout" className="block py-2">
+            Logout
+          </a>
+        </li>
       </ul>
     </div>
   );
@@ -44,9 +74,10 @@ export const Profile: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [, setSelectedOrder] = useState<Order | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [ordersCount, setOrdersCount] = useState<number>(0); // Total count of items
+  const [, setOrdersCount] = useState<number>(0);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]); // Typed cartItems as CartItem array
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,12 +110,13 @@ export const Profile: React.FC = () => {
         setError("Error fetching orders");
       } else {
         setOrders(ordersData || []);
-        
+
         // Count the total number of items across all orders
-        const totalItems = ordersData?.reduce(
-          (acc, order) => acc + (order.items?.length || 0),
-          0
-        ) || 0;
+        const totalItems =
+          ordersData?.reduce(
+            (acc, order) => acc + (order.items?.length || 0),
+            0
+          ) || 0;
 
         setOrdersCount(totalItems); // Update the orders count with total item count
       }
@@ -94,10 +126,15 @@ export const Profile: React.FC = () => {
 
     fetchUserData();
 
+    if (modalVisible) {
+      const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      setCartItems(storedCart);
+    }
+
     // Animation on page load
     gsap.from(".profile-container", { opacity: 0, duration: 1, y: -50 });
     gsap.from(".sidebar", { opacity: 0, duration: 1, x: -100 });
-  }, [navigate]);
+  }, [navigate, modalVisible]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -111,7 +148,6 @@ export const Profile: React.FC = () => {
 
   const closeModal = () => {
     setModalVisible(false);
-    setSelectedOrder(null);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -119,8 +155,7 @@ export const Profile: React.FC = () => {
 
   return (
     <div className="flex">
-      <Sidebar ordersCount={ordersCount} /> {/* Pass the updated order count */}
-
+      <Sidebar />
       <div className="profile-container flex-1 p-10 bg-gray-50">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
           <h2 className="text-3xl font-semibold text-center text-orange-600 mb-6">
@@ -134,7 +169,10 @@ export const Profile: React.FC = () => {
                 <p className="text-gray-900">{userData.id}</p>
                 <h3 className="text-xl font-medium text-gray-700">Email:</h3>
                 <p className="text-gray-900">{userData.email}</p>
-                <h3 className="text-xl font-medium text-gray-700">Account Created:</h3>
+
+                <h3 className="text-xl font-medium text-gray-700">
+                  Account Created:
+                </h3>
                 <p className="text-gray-900">
                   {new Date(userData.created_at).toLocaleDateString()}
                 </p>
@@ -157,9 +195,12 @@ export const Profile: React.FC = () => {
                 >
                   <p className="font-semibold">Order ID: {order.id}</p>
                   <p className="text-gray-600">
-                    Order Date: {new Date(order.created_at).toLocaleDateString()}
+                    Order Date:{" "}
+                    {new Date(order.created_at).toLocaleDateString()}
                   </p>
-                  <p className="font-bold">Total: ${order.total_price.toFixed(2)}</p>
+                  <p className="font-bold">
+                    Total: ${order.total_price.toFixed(2)}
+                  </p>
                 </div>
               ))}
             </div>
@@ -175,24 +216,23 @@ export const Profile: React.FC = () => {
         </div>
 
         {/* Order Details Modal */}
-        {modalVisible && selectedOrder && (
+        {modalVisible && (
           <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
             <div className="bg-white p-8 rounded-lg w-96">
-              <h3 className="text-2xl font-semibold mb-4">Order Details</h3>
-              <p className="text-lg mb-4">Order ID: {selectedOrder.id}</p>
-              <p className="text-lg mb-4">Order Date: {new Date(selectedOrder.created_at).toLocaleDateString()}</p>
-              <p className="text-lg mb-4">Total: ${selectedOrder.total_price.toFixed(2)}</p>
-
+              <h3 className="text-2xl font-semibold mb-4">Cart Details</h3>
               <div className="items">
-                <h4 className="font-semibold">Items:</h4>
+                <h4 className="font-semibold">Items in Cart:</h4>
                 <ul>
-                  {selectedOrder.items.map((item, index) => (
-                    <li key={index} className="flex justify-between">
-                      <span>
-                        {item.quantity} x ${item.price.toFixed(2)}
-                      </span>
-                    </li>
-                  ))}
+                  {cartItems.length === 0 ? (
+                    <p>No items in the cart.</p>
+                  ) : (
+                    cartItems.map((item, index) => (
+                      <li key={index} className="flex justify-between">
+                        <span>{item.quantity} x {item.title}</span>
+                        <span>${item.price.toFixed(2)}</span>
+                      </li>
+                    ))
+                  )}
                 </ul>
               </div>
 
