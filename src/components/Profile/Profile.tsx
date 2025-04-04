@@ -41,7 +41,7 @@ const Sidebar: React.FC = () => {
   }, []);
 
   return (
-    <div className="sidebar bg-gray-800 text-white w-64 p-5">
+    <div className="sidebar bg-gray-800 text-white w-full md:w-64 p-5">
       <h2 className="text-xl font-semibold mb-4">User Dashboard</h2>
       <ul>
         <li>
@@ -154,10 +154,10 @@ export const Profile: React.FC = () => {
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row">
       <Sidebar />
-      <div className="profile-container flex-1 p-10 bg-gray-50">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+      <div className="profile-container flex-1 p-5 bg-gray-50">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg mx-auto">
           <h2 className="text-3xl font-semibold text-center text-orange-600 mb-6">
             Profile Page
           </h2>

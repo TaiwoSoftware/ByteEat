@@ -21,17 +21,17 @@ export const LandingPage = () => {
         <div className="absolute inset-0 bg-gradient-to-b font-fredoka from-black/70 to-black/50 backdrop-blur-[2px]"></div>
         <div className="relative z-10 flex items-center justify-center h-full">
           <div className="text-center max-w-4xl mx-auto px-4">
-            <h1 className="text-5xl md:text-7xl text-white font-bold tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl text-white font-bold tracking-tight">
               Fast, Hot &amp;
               <br />
               <span className="text-orange-400">Right To Your Doorstep</span>
             </h1>
-            <p className="mt-6 text-xl text-gray-200 max-w-2xl mx-auto">
+            <p className="mt-6 text-lg sm:text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
               Experience the finest cuisine delivered right to your doorstep.
               Fresh, hot, and made with love.
             </p>
             <Link to={'/shop'}>
-              <button className="mt-8 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white text-xl font-semibold rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+              <button className="mt-8 px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white text-lg md:text-xl font-semibold rounded-full transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
                 Place your order
               </button>
             </Link>
@@ -42,8 +42,8 @@ export const LandingPage = () => {
       {/* Menu Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center mb-16">
-          <p className="text-2xl text-[#a82f17] font-medium">What we serve</p>
-          <h2 className="mt-2 text-4xl font-bold">
+          <p className="text-xl sm:text-2xl text-[#a82f17] font-medium">What we serve</p>
+          <h2 className="mt-2 text-3xl sm:text-4xl font-bold">
             Menu that always
             <br />
             Makes you fall in love
@@ -88,9 +88,9 @@ export const LandingPage = () => {
           </div>
         </div>
 
-        <div className="text-center">
+        <div className="text-center mt-12">
           <Link to={"/shop"}>
-            <button className="py-3 px-8 bg-orange-600 text-white rounded-full font-semibold text-lg hover:bg-orange-700 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50 shadow-md">
+            <button className="py-3 px-8 bg-orange-600 text-white rounded-full font-semibold text-lg sm:text-xl hover:bg-orange-700 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50 shadow-md">
               Shop
             </button>
           </Link>

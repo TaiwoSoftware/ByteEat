@@ -12,6 +12,7 @@ export const Navbar = () => {
   const [servicesOpen, setServicesOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [hamburgerMenuOpen, setHamburgerMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,7 +41,18 @@ export const Navbar = () => {
           <Logo />
         </Link>
 
-        <div className="flex gap-4 items-center">
+        {/* Hamburger Icon (Visible on smaller screens) */}
+        <div className="lg:hidden flex items-center">
+          <button
+            onClick={() => setHamburgerMenuOpen(!hamburgerMenuOpen)}
+            className="text-black text-2xl"
+          >
+            &#9776; {/* Hamburger icon */}
+          </button>
+        </div>
+
+        {/* Main Menu (Visible on larger screens) */}
+        <div className="hidden lg:flex gap-4 items-center">
           <NavLinks to="/" title="Why ByteEat" />
 
           {/* Services Dropdown */}
@@ -90,27 +102,53 @@ export const Navbar = () => {
           <NavLinks to="/vendor" title="Vendors Corner" />
         </div>
 
-        <div className="flex gap-4 items-center">
+        {/* Cart and User Icons (Visible on Desktop, hidden on Mobile) */}
+        <div className="hidden lg:flex gap-4 items-center">
           {/* Cart */}
-          <div className="flex gap-3">
-            <Link to={"/cart"}>
-              <div className="bg-[#a82f17] text-center w-11 p-2 rounded-full">
-                <BiCart className="text-3xl text-white" />
-              </div>
-            </Link>
-            <div
-              onClick={handleUserIconClick}
-              className="bg-[#a82f17] text-center w-11 p-2 rounded-full cursor-pointer"
-            >
-              {user ? (
-                <FaUser className="text-3xl text-white" />
-              ) : (
-                <IoMdLogIn className="text-3xl text-white" />
-              )}
+          <Link to={"/cart"}>
+            <div className="bg-[#a82f17] text-center w-11 p-2 rounded-full">
+              <BiCart className="text-3xl text-white" />
             </div>
+          </Link>
+          {/* User Icon */}
+          <div
+            onClick={handleUserIconClick}
+            className="bg-[#a82f17] text-center w-11 p-2 rounded-full cursor-pointer"
+          >
+            {user ? (
+              <FaUser className="text-3xl text-white" />
+            ) : (
+              <IoMdLogIn className="text-3xl text-white" />
+            )}
           </div>
         </div>
       </nav>
+
+      {/* Hamburger Menu (Visible on smaller screens) */}
+      <div
+        className={`lg:hidden bg-white absolute top-0 left-0 w-full h-screen transition-transform duration-300 ${hamburgerMenuOpen ? "transform translate-x-0" : "transform -translate-x-full"}`}
+        style={{ zIndex: 999 }} // Added z-index here to ensure it's above other content
+      >
+        {/* Close Button */}
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={() => setHamburgerMenuOpen(false)}
+            className="text-3xl text-black"
+          >
+            &#10005; {/* Cancel (X) icon */}
+          </button>
+        </div>
+
+        <div className="flex flex-col items-center py-8">
+          <NavLinks to="/" title="Why ByteEat" />
+          <NavLinks to="/shop" title="Order" />
+          <NavLinks to="/shop" title="Menu" />
+          <NavLinks to="/profile" title="Profile" />
+          <NavLinks to="/contact" title="Contact" />
+          <NavLinks to="/vendor" title="Vendors Corner" />
+        </div>
+      </div>
+
       <hr className="mt-4" />
     </>
   );
