@@ -18,7 +18,9 @@ export const Navbar = () => {
   useEffect(() => {
     // Check if the user is authenticated on page load
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUser(user);
     };
     checkUser();
@@ -45,7 +47,7 @@ export const Navbar = () => {
         <div className="lg:hidden flex items-center">
           <button
             onClick={() => setHamburgerMenuOpen(!hamburgerMenuOpen)}
-            className="text-black text-2xl"
+            className="text-black text-5xl"
           >
             &#9776; {/* Hamburger icon */}
           </button>
@@ -126,7 +128,11 @@ export const Navbar = () => {
 
       {/* Hamburger Menu (Visible on smaller screens) */}
       <div
-        className={`lg:hidden bg-white absolute top-0 left-0 w-full h-screen transition-transform duration-300 ${hamburgerMenuOpen ? "transform translate-x-0" : "transform -translate-x-full"}`}
+        className={`lg:hidden bg-white absolute top-0 left-0 w-full h-screen transition-transform duration-300 ${
+          hamburgerMenuOpen
+            ? "transform translate-x-0"
+            : "transform -translate-x-full"
+        }`}
         style={{ zIndex: 999 }} // Added z-index here to ensure it's above other content
       >
         {/* Close Button */}
@@ -139,13 +145,47 @@ export const Navbar = () => {
           </button>
         </div>
 
-        <div className="flex flex-col items-center py-8">
-          <NavLinks to="/" title="Why ByteEat" />
-          <NavLinks to="/shop" title="Order" />
-          <NavLinks to="/shop" title="Menu" />
-          <NavLinks to="/profile" title="Profile" />
-          <NavLinks to="/contact" title="Contact" />
-          <NavLinks to="/vendor" title="Vendors Corner" />
+        <div className="flex flex-col items-center mt-28 py-8">
+          <Link to="/">
+            <div className="flex items-center">
+              <p className="font-fredoka text-2xl mt-2 font-semibold  ">Why ByteEat</p>
+            </div>
+          </Link>
+          <Link to="/shop">
+            <div className="flex items-center">
+              <p className="font-fredoka text-2xl mt-2 font-semibold  ">Order</p>
+            </div>
+          </Link>
+          <Link to="/shop">
+            <div className="flex items-center">
+              <p className="font-fredoka text-2xl mt-2 font-semibold  ">Menu</p>
+            </div>
+          </Link>
+          <Link to="/profile">
+            <div className="flex items-center">
+              <p className="font-fredoka text-2xl mt-2 font-semibold  ">Profile</p>
+            </div>
+          </Link>
+          <Link to="/contact">
+            <div className="flex items-center">
+              <p className="font-fredoka text-2xl mt-2 font-semibold  ">Contact</p>
+            </div>
+          </Link>
+          <Link to="/vendor">
+            <div className="flex items-center">
+              <p className="font-fredoka text-2xl mt-2 font-semibold  ">Vendor's Corner</p>
+            </div>
+          </Link>
+          <Link to="/cart">
+            <div className="flex items-center">
+              <p className="font-fredoka text-2xl mt-2 font-semibold  ">Cart</p>
+            </div>
+          </Link>
+          <Link to="/user">
+            <div className="flex items-center">
+              <p className="font-fredoka text-2xl mt-2 font-semibold  ">Sign in</p>
+            </div>
+          </Link>
         </div>
       </div>
 
