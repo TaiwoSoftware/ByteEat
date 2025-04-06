@@ -12,11 +12,10 @@ html {
     margin: 0 auto;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'fredoka';
 }
 
-.new {
-    font-family: cursive;
-}
+
 
 @keyframes bounceWithDelay {
     0% { opacity: 0; transform: translateY(10px); }
