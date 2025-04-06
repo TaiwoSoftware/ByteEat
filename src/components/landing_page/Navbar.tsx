@@ -181,7 +181,7 @@ export const Navbar = () => {
               <p className="font-fredoka text-2xl mt-2 font-semibold  ">Cart</p>
             </div>
           </Link>
-          <Link to="/user">
+          <Link to="/select">
             <div className="flex items-center">
               <p className="font-fredoka text-2xl mt-2 font-semibold  ">Sign in</p>
             </div>
