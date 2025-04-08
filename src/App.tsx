@@ -15,6 +15,7 @@ import { VendorsDashboard } from "./components/vendors/VendorsDashboard";
 import { Profile } from "./components/Profile/Profile";
 import { CartProvider } from "./components/cart/CartContext";
 import UserSelection from "./components/landing_page/UserSelection";
+import { TrackOrder } from "./components/cart/Trackorder";
 export const App = () => {
   return (
     <>
@@ -33,6 +34,8 @@ export const App = () => {
             <Route path="/shop" element={<Shop />} />
             <Route path="/select" element={<UserSelection />} />
             <Route path="/vendor" element={<VendorsPage />} />
+            <Route path="/track-order" element={<TrackOrder />} />
+
             <Route path="/vendor_dashboard" element={<VendorsDashboard />} />
           </Routes>
           <Footer />
