@@ -10,6 +10,7 @@ export const AdminDashboard = () => {
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [totalVendors, setTotalVendors] = useState<number>(0);
   const [user, setUser] = useState<User | null>(null);
+  const [selectedUserId] = useState<number | null>(null); // State for selected user
   const [, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -25,13 +26,11 @@ export const AdminDashboard = () => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, session: Session | null) => {
-        if (isMounted) {
-          setUser(session?.user ?? null);
-        }
+    } = supabase.auth.onAuthStateChange((_event, session: Session | null) => {
+      if (isMounted) {
+        setUser(session?.user ?? null);
       }
-    );
+    });
 
     const fetchTotalUsers = async () => {
       try {
@@ -76,6 +75,7 @@ export const AdminDashboard = () => {
     };
   }, []);
 
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
       {/* Sidebar */}
@@ -116,14 +116,18 @@ export const AdminDashboard = () => {
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
             <p className="text-gray-600 text-sm">Total Vendors</p>
-            <p className="text-3xl font-semibold text-gray-800">{totalVendors}</p>
+            <p className="text-3xl font-semibold text-gray-800">
+              {totalVendors}
+            </p>
           </div>
         </div>
 
         {/* Users Section */}
         <div id="users" className="mt-10">
           <Users />
-          <UserOrders userId={user?.id ?? ""} />
+          {user && selectedUserId && (
+            <UserOrders userId={selectedUserId} /> // Render UserOrders when a user is selected
+          )}
         </div>
       </main>
     </div>

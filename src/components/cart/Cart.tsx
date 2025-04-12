@@ -69,14 +69,15 @@ export const Cart = () => {
         throw new Error("You must be logged in to place an order.");
       }
 
-      const orderData: OrderData = {
+      const orderData: OrderData & { user_id: string } = {
         items: cart,
         total_price: totalPrice,
         recipient_name: recipientName,
         address,
         payment_method: JSON.stringify(paymentMethod),
         user_email: user.email || "",
-        order_status: "Order Placed"
+        order_status: "Order Placed",
+        user_id: user.id, // ✅ Add authenticated user ID here
       };
 
       const { error } = await supabase.from("orders").insert([orderData]);
@@ -89,17 +90,16 @@ export const Cart = () => {
     } catch (error) {
       console.error("Order error:", error);
       alert(
-        error instanceof Error ? error.message : "Error placing order. Try again."
+        error instanceof Error
+          ? error.message
+          : "Error placing order. Try again."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const sendConfirmationEmail = async (
-    email: string,
-    orderData: OrderData
-  ) => {
+  const sendConfirmationEmail = async (email: string, orderData: OrderData) => {
     const itemsList = orderData.items
       .map(
         (item) =>

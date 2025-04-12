@@ -49,10 +49,8 @@ const Sidebar: React.FC = () => {
             Profile
           </a>
         </li>
-        <Link to={'/cart'}>
-          <li>
-            Cart ({ordersCount})
-          </li>
+        <Link to={"/cart"}>
+          <li>Cart ({ordersCount})</li>
         </Link>
         <li>
           <a href="#settings" className="block py-2">
@@ -84,41 +82,44 @@ export const Profile: React.FC = () => {
     const fetchUserData = async () => {
       setLoading(true);
 
-      const { data, error } = await supabase.auth.getUser();
+      const { data: authData, error: authError } =
+        await supabase.auth.getUser();
 
-      if (error || !data?.user) {
-        console.error("User not authenticated", error);
+      if (authError || !authData?.user) {
+        console.error("User not authenticated", authError);
         setError("User not authenticated");
         navigate("/user");
         return;
       }
 
+      const user = authData.user;
+
       setUserData({
-        id: data.user.id,
-        email: data.user.email!,
-        created_at: data.user.created_at!,
+        id: user.id,
+        email: user.email!,
+        created_at: user.created_at!,
       });
 
-      // Fetch orders placed by the user
+      // Fetch orders placed by the current user
       const { data: ordersData, error: ordersError } = await supabase
         .from("orders")
         .select("*")
-        .eq("user_id", data.user.id);
+        .eq("user_id", user.id);
 
       if (ordersError) {
         console.error("Error fetching orders:", ordersError);
         setError("Error fetching orders");
+        console.log("Authenticated user ID:", user.id);
       } else {
         setOrders(ordersData || []);
 
-        // Count the total number of items across all orders
-        const totalItems =
-          ordersData?.reduce(
-            (acc, order) => acc + (order.items?.length || 0),
-            0
-          ) || 0;
+        // Count total items across all orders
+        const totalItems = (ordersData ?? []).reduce((acc, order) => {
+          const itemCount = Array.isArray(order.items) ? order.items.length : 0;
+          return acc + itemCount;
+        }, 0);
 
-        setOrdersCount(totalItems); // Update the orders count with total item count
+        setOrdersCount(totalItems);
       }
 
       setLoading(false);
@@ -190,15 +191,41 @@ export const Profile: React.FC = () => {
               {orders.map((order) => (
                 <div
                   key={order.id}
-                  className="order-item border p-4 mb-4 rounded-lg cursor-pointer"
+                  className="order-item border p-4 mb-6 rounded-lg cursor-pointer bg-white shadow-md"
                   onClick={() => handleOrderClick(order)}
                 >
-                  <p className="font-semibold">Order ID: {order.id}</p>
+
                   <p className="text-gray-600">
                     Order Date:{" "}
-                    {new Date(order.created_at).toLocaleDateString()}
+                    {new Date(order.created_at).toLocaleDateString()} -{" "}
+                    {new Date(order.created_at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
-                  <p className="font-bold">
+
+                  <div className="items mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {order.items?.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex gap-4 items-center border p-2 rounded-md"
+                      >
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                        <div>
+                          <p className="font-medium">{item.title}</p>
+                          <p className="text-sm text-gray-500">
+                            {item.quantity} x ${item.price.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="font-bold mt-4 text-right">
                     Total: ${order.total_price.toFixed(2)}
                   </p>
                 </div>
@@ -228,7 +255,9 @@ export const Profile: React.FC = () => {
                   ) : (
                     cartItems.map((item, index) => (
                       <li key={index} className="flex justify-between">
-                        <span>{item.quantity} x {item.title}</span>
+                        <span>
+                          {item.quantity} x {item.title}
+                        </span>
                         <span>${item.price.toFixed(2)}</span>
                       </li>
                     ))

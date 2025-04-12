@@ -1,11 +1,29 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../Auth/supabaseClient";
-import type { UserWithOrders } from "../Admin/types/database";
+import UserOrders from "./UserOrder";
+
+// Define types for User and Orders
+interface Order {
+  id: string;
+  created_at: string;
+  total_price: number;
+  order_status: string;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  location: string | null;
+  phone_number: string | null;
+  orders: Order[];
+}
 
 const Users = () => {
-  const [users, setUsers] = useState<UserWithOrders[]>([]);
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
+  const [users, setUsers] = useState<User[]>([]); // Type the state as User[]
+  const [error, setError] = useState<string>(""); // Error message is a string
+  const [loading, setLoading] = useState<boolean>(true); // Loading is a boolean
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null); // User ID can be string or null
 
   useEffect(() => {
     const fetchUsersAndOrders = async () => {
@@ -25,25 +43,25 @@ const Users = () => {
           return;
         }
 
-        const usersWithOrders: UserWithOrders[] = await Promise.all(
+        const usersWithOrders = await Promise.all(
           usersData.map(async (user) => {
             const { data: ordersData, error: ordersError } = await supabase
               .from("orders")
-              .select("id, created_at, total_amount, status")
+              .select("id, created_at, total_price, order_status")
               .eq("user_id", user.id);
 
             if (ordersError) {
               console.error("Error fetching orders for user:", ordersError);
               return {
                 ...user,
-                orders: [],
-              } as UserWithOrders;
+                orders: [], // Ensure we return an empty array in case of an error
+              };
             }
 
             return {
               ...user,
-              orders: ordersData ?? [],
-            } as UserWithOrders;
+              orders: ordersData ?? [], // Ensure empty array if no orders
+            };
           })
         );
 
@@ -87,52 +105,44 @@ const Users = () => {
           >
             <div className="p-6">
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {user.name}
+                {user.name || "No Name"}
               </h3>
               <div className="space-y-2 text-gray-600">
                 <p>{user.email}</p>
-                <p>{user.location}</p>
-                <p>{user.phone_number}</p>
+                <p>{user.location || "No Location"}</p>
+                <p>{user.phone_number || "No Phone"}</p>
               </div>
 
               <div className="mt-6">
                 <h4 className="font-semibold text-gray-900 mb-3">Orders</h4>
-                {user.orders.length > 0 ? (
-                  <div className="space-y-3">
-                    {user.orders.map((order) => (
-                      <div key={order.id} className="bg-gray-50 p-3 rounded">
-                        <p className="text-sm font-medium text-gray-900">
-                          Order ID: {order.id}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Date:{" "}
-                          {new Date(order.created_at).toLocaleDateString()}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Amount: ${order.total_amount.toFixed(2)}
-                        </p>
-                        <span
-                          className={`inline-block px-2 py-1 text-xs rounded-full ${
-                            order.status === "completed"
-                              ? "bg-green-100 text-green-800"
-                              : order.status === "pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {order.status}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">No orders placed yet.</p>
-                )}
+                <button
+                  onClick={() => setSelectedUserId(user.id)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  View Orders
+                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {selectedUserId && (
+        <div className="mt-6">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">User Orders</h3>
+              <button
+                onClick={() => setSelectedUserId(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Close
+              </button>
+            </div>
+            <UserOrders userId={selectedUserId} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,8 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "./supabaseClient";
-import { FormData } from "./typeUser";
+import { supabase } from "../Auth/supabaseClient";
+
+interface FormData {
+  name: string;
+  email: string;
+  password: string;
+  location: string;
+  phoneNumber: string;
+  confirmPassword: string;
+}
 
 export const NewUser: React.FC = () => {
   const navigate = useNavigate();
@@ -31,56 +38,59 @@ export const NewUser: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    // Validate passwords
+  
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match!");
       setLoading(false);
       return;
     }
-
+  
     try {
-      const {  error: authError } = await supabase.auth.signUp({
+      // Sign up the user
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        options: {
-          data: {
-            full_name: formData.name,
-            location: formData.location,
-            phone_number: formData.phoneNumber,
-          },
-        },
       });
-
-      if (authError) throw authError;
-
-      // Directly insert the profile into the 'profiles' table without using the user_id
+  
+      if (signUpError) throw signUpError;
+  
+      // Get the user ID
+      const userId = signUpData.user?.id;
+  
+      if (!userId) {
+        throw new Error("User ID not found after signup.");
+      }
+  
+      // Insert user data into the 'profiles' table
       const { error: profileError } = await supabase.from("profiles").insert([
         {
-          name: formData.name,
+          user_id: userId,
           email: formData.email,
-          phone_number: formData.phoneNumber,
+          name: formData.name,
           location: formData.location,
+          phone_number: formData.phoneNumber,
         },
       ]);
-
+  
       if (profileError) throw profileError;
-
-      console.log("Profile inserted successfully!");
-
-      // Navigate to the login page after successful signup and profile insertion
+  
+      // Let user know to check their email
+      alert("Check your email to confirm your account before logging in.");
+  
+      // Optionally redirect to login or confirmation page
       navigate("/login");
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Supabase Error:", err);
       setError(
-        err instanceof Error
-          ? err.message
-          : "Registration failed. Please try again."
+        err instanceof Error ? err.message : "Registration failed. Please try again."
       );
     } finally {
       setLoading(false);
     }
   };
+  
+  
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-10">
@@ -226,3 +236,5 @@ export const NewUser: React.FC = () => {
     </div>
   );
 };
+
+export default NewUser;
