@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "./supabaseClient";
@@ -39,7 +40,7 @@ export const NewUser: React.FC = () => {
     }
 
     try {
-      const { data, error: authError } = await supabase.auth.signUp({
+      const {  error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -52,9 +53,22 @@ export const NewUser: React.FC = () => {
       });
 
       if (authError) throw authError;
-      if (!data?.user) throw new Error("User signup failed");
 
-      console.log("User registered successfully:", data.user.id);
+      // Directly insert the profile into the 'profiles' table without using the user_id
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          name: formData.name,
+          email: formData.email,
+          phone_number: formData.phoneNumber,
+          location: formData.location,
+        },
+      ]);
+
+      if (profileError) throw profileError;
+
+      console.log("Profile inserted successfully!");
+
+      // Navigate to the login page after successful signup and profile insertion
       navigate("/login");
     } catch (err) {
       console.error("Error:", err);
