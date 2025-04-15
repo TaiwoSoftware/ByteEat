@@ -1,7 +1,7 @@
 import { useCart } from "./CartContext";
 import { FaShoppingCart } from "react-icons/fa";
 import { supabase } from "../Auth/supabaseClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import emailjs from "@emailjs/browser";
 
 interface CartItem {
@@ -28,16 +28,52 @@ interface OrderData {
   order_status: string;
 }
 
+interface FoodImage {
+  id: string;
+  image_url: string;
+}
+
 export const Cart = () => {
   const { cart, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [recipientName, setRecipientName] = useState("");
   const [address, setAddress] = useState("");
+  const [foodImages, setFoodImages] = useState<Record<string, string>>({});
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>({
     cardNumber: "",
     cvv: "",
     expiryDate: "",
   });
+
+  useEffect(() => {
+    const fetchFoodImages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('foods')
+          .select('id, image_url')
+          .in('id', cart.map(item => item.id));
+
+        if (error) {
+          console.error('Error fetching food images:', error);
+          return;
+        }
+
+        if (data) {
+          const imageMap = data.reduce((acc: Record<string, string>, food: FoodImage) => {
+            acc[food.id] = food.image_url;
+            return acc;
+          }, {});
+          setFoodImages(imageMap);
+        }
+      } catch (error) {
+        console.error('Error in fetchFoodImages:', error);
+      }
+    };
+
+    if (cart.length > 0) {
+      fetchFoodImages();
+    }
+  }, [cart]);
 
   const totalPrice = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -70,14 +106,17 @@ export const Cart = () => {
       }
 
       const orderData: OrderData & { user_id: string } = {
-        items: cart,
+        items: cart.map(item => ({
+          ...item,
+          image: foodImages[item.id] || item.image
+        })),
         total_price: totalPrice,
         recipient_name: recipientName,
         address,
         payment_method: JSON.stringify(paymentMethod),
         user_email: user.email || "",
         order_status: "Order Placed",
-        user_id: user.id, // ✅ Add authenticated user ID here
+        user_id: user.id,
       };
 
       const { error } = await supabase.from("orders").insert([orderData]);
@@ -125,7 +164,7 @@ export const Cart = () => {
         "service_byte",
         "template_ycuyjpi",
         emailTemplateParams,
-        "KZ5IuiyfkxTw53AN8" // Replace with your actual EmailJS public key
+        "KZ5IuiyfkxTw53AN8"
       );
 
       if (response.status === 200) {
@@ -160,15 +199,20 @@ export const Cart = () => {
                   className="flex items-center justify-between p-4 bg-gray-100 rounded-lg"
                 >
                   <img
-                    src={item.image}
+                    src={foodImages[item.id] || item.image}
                     alt={item.title}
                     className="w-20 h-20 rounded-lg object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = item.image; // Fallback to original image
+                    }}
                   />
                   <div className="flex-1 ml-4">
                     <h3 className="text-lg font-semibold text-gray-800">
                       {item.title}
                     </h3>
                     <p className="text-orange-600 font-bold">${item.price}</p>
+                    <p className="text-gray-600">Quantity: {item.quantity}</p>
                   </div>
                 </div>
               ))}
