@@ -33,12 +33,24 @@ interface FoodImage {
   image_url: string;
 }
 
+const orderStatuses = [
+  "Order Placed",
+  "Order Confirmed",
+  "Preparing Food",
+  "Food Ready",
+  "Out for Delivery",
+  "Delivered"
+];
+
 export const Cart = () => {
   const { cart, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [recipientName, setRecipientName] = useState("");
   const [address, setAddress] = useState("");
   const [foodImages, setFoodImages] = useState<Record<string, string>>({});
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [orderStatus, setOrderStatus] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>({
     cardNumber: "",
     cvv: "",
@@ -74,6 +86,34 @@ export const Cart = () => {
       fetchFoodImages();
     }
   }, [cart]);
+
+  useEffect(() => {
+    let subscription: any;
+
+    if (currentOrderId) {
+      subscription = supabase
+        .channel(`order-${currentOrderId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+            filter: `id=eq.${currentOrderId}`,
+          },
+          (payload: any) => {
+            setOrderStatus(payload.new.order_status);
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      if (subscription) {
+        supabase.removeChannel(subscription);
+      }
+    };
+  }, [currentOrderId]);
 
   const totalPrice = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -119,12 +159,16 @@ export const Cart = () => {
         user_id: user.id,
       };
 
-      const { error } = await supabase.from("orders").insert([orderData]);
+      const { data, error } = await supabase.from("orders").insert([orderData]).select();
       if (error) throw new Error(error.message);
 
-      await sendConfirmationEmail(user.email || "", orderData);
+      if (data && data[0]) {
+        setCurrentOrderId(data[0].id);
+        setOrderStatus("Order Placed");
+        setShowTrackingModal(true);
+      }
 
-      alert("Order placed successfully!");
+      await sendConfirmationEmail(user.email || "", orderData);
       clearCart();
     } catch (error) {
       console.error("Order error:", error);
@@ -178,6 +222,11 @@ export const Cart = () => {
     }
   };
 
+  const getStatusPercentage = () => {
+    const currentIndex = orderStatuses.indexOf(orderStatus);
+    return ((currentIndex + 1) / orderStatuses.length) * 100;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 md:px-12">
       <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-8">
@@ -204,7 +253,7 @@ export const Cart = () => {
                     className="w-20 h-20 rounded-lg object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = item.image; // Fallback to original image
+                      target.src = item.image;
                     }}
                   />
                   <div className="flex-1 ml-4">
@@ -318,6 +367,37 @@ export const Cart = () => {
                 Clear Cart
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Tracking Modal */}
+      {showTrackingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">Order Status</h2>
+            <div className="mb-6">
+              <div className="h-2 bg-gray-200 rounded-full">
+                <div
+                  className="h-full bg-green-500 rounded-full transition-all duration-500"
+                  style={{ width: `${getStatusPercentage()}%` }}
+                ></div>
+              </div>
+              <div className="mt-4">
+                <p className="text-lg font-semibold text-gray-800">{orderStatus}</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  {orderStatus === "Delivered"
+                    ? "Your order has been delivered!"
+                    : "Your order is being processed"}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowTrackingModal(false)}
+              className="w-full py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
