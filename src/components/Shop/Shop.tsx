@@ -9,6 +9,7 @@ const API_URL =
 export const Shop = () => {
   const [meals, setMeals] = useState<any[]>([]);
   const [vendorMeals, setVendorMeals] = useState<any[]>([]);
+  const [foods, setFoods] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -21,13 +22,11 @@ export const Shop = () => {
         setMeals(response.data.recipes);
       } catch (error) {
         console.error("Error fetching food data", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     const fetchVendorMeals = async () => {
-      const { data, error } = await supabase.from("foods").select("*");
+      const { data, error } = await supabase.from("vendors").select("*");
       if (error) {
         console.error("Error fetching vendor meals:", error.message);
       } else {
@@ -35,14 +34,23 @@ export const Shop = () => {
       }
     };
 
-    fetchMeals();
-    fetchVendorMeals();
+    const fetchFoods = async () => {
+      const { data, error } = await supabase.from("foods").select("*");
+      if (error) {
+        console.error("Error fetching foods:", error.message);
+      } else {
+        setFoods(data || []);
+      }
+    };
+
+    Promise.all([fetchMeals(), fetchVendorMeals(), fetchFoods()])
+      .finally(() => setLoading(false));
   }, []);
 
   const handleAddToCart = (meal: any) => {
     const cartItem = {
       id: meal.id,
-      title: meal.title,
+      title: meal.title || meal.name, // Handle both API meals and foods
       image: meal.image,
       price: meal.price || Math.floor(Math.random() * (20 - 10 + 1)) + 100,
       quantity: 1,
@@ -57,6 +65,10 @@ export const Shop = () => {
 
   const filteredVendorMeals = vendorMeals.filter((meal) =>
     meal?.title?.toLowerCase?.()?.includes(searchTerm.toLowerCase()) ?? false
+  );
+
+  const filteredFoods = foods.filter((food) =>
+    food?.name?.toLowerCase?.()?.includes(searchTerm.toLowerCase()) ?? false
   );
 
   return (
@@ -81,6 +93,52 @@ export const Shop = () => {
         </div>
       ) : (
         <>
+          {/* Foods from Supabase Section */}
+          {filteredFoods.length > 0 && (
+            <div className="mb-16">
+              <h2 className="text-3xl font-bold text-center text-orange-600 mb-8">
+                Featured Foods
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {filteredFoods.map((food) => (
+                  <div
+                    key={food.id}
+                    className="relative rounded-2xl overflow-hidden shadow-lg bg-white transition-transform duration-300 hover:scale-105"
+                  >
+                    <div className="relative h-[250px]">
+                      <img
+                        src={food.image_url}
+                        alt={food.name || 'Food image'}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                      />
+                    </div>
+
+                    <div className="p-6 bg-white">
+                      <h3 className="text-2xl font-semibold text-gray-800 mb-3">
+                        {food.name || 'Untitled Food'}
+                      </h3>
+                      <div className="text-sm text-gray-600 mb-4 line-clamp-3">
+                        {food.details || "No description available"}
+                      </div>
+
+                      <div className="flex justify-between items-center mt-auto">
+                        <span className="text-xl font-bold text-orange-600">
+                          ${food.price}
+                        </span>
+                        <button
+                          onClick={() => handleAddToCart(food)}
+                          className="px-4 py-2 bg-orange-600 text-white rounded-full font-medium text-sm hover:bg-orange-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+                        >
+                          Add to cart
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* API Meals Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-12">
             {filteredMeals.map((meal) => (
