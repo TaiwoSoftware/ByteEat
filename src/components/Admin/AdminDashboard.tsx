@@ -1,32 +1,37 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../Auth/supabaseClient";
-import { Session, User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import Users from "./Users";
 import UserOrders from "./UserOrder";
+// import type { Database } from '../Auth/database';
+
+// type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export const AdminDashboard = () => {
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [totalVendors, setTotalVendors] = useState<number>(0);
   const [user, setUser] = useState<User | null>(null);
-  const [selectedUserId] = useState<number | null>(null); // State for selected user
-  const [, setLoading] = useState<boolean>(true);
+  const [selectedUserId, ] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    let isMounted = true; // to avoid state update on unmounted component
+    let isMounted = true;
 
-    // Set up auth listener
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (isMounted) {
-        setUser(session?.user ?? null);
+    const setupAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (isMounted) {
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Auth error:', error);
         setLoading(false);
       }
-    });
+    };
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (isMounted) {
         setUser(session?.user ?? null);
       }
@@ -38,14 +43,10 @@ export const AdminDashboard = () => {
           .from("profiles")
           .select("*", { count: "exact", head: true });
 
-        if (error) {
-          console.error("Error fetching users:", error.message);
-          return;
-        }
-
-        setTotalUsers(count ?? 0);
+        if (error) throw error;
+        if (isMounted) setTotalUsers(count ?? 0);
       } catch (err) {
-        console.error("Error:", err);
+        console.error("Error fetching users:", err);
       }
     };
 
@@ -55,17 +56,14 @@ export const AdminDashboard = () => {
           .from("vendors")
           .select("*", { count: "exact", head: true });
 
-        if (error) {
-          console.error("Error fetching vendors:", error.message);
-          return;
-        }
-
-        setTotalVendors(count ?? 0);
+        if (error) throw error;
+        if (isMounted) setTotalVendors(count ?? 0);
       } catch (err) {
-        console.error("Error:", err);
+        console.error("Error fetching vendors:", err);
       }
     };
 
+    setupAuth();
     fetchTotalUsers();
     fetchTotalVendors();
 
@@ -75,11 +73,18 @@ export const AdminDashboard = () => {
     };
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
       {/* Sidebar */}
-      <aside className="w-full lg:w-64 bg-white shadow-md p-6 lg:h-full lg:block flex-shrink-0">
+      <aside className="w-full lg:w-64 bg-white shadow-md p-6 lg:h-screen lg:block flex-shrink-0">
         <h2 className="text-xl font-bold mb-4">Admin Panel</h2>
         <nav className="space-y-4">
           <Link to="#" className="block text-gray-700 hover:text-orange-600">
@@ -107,14 +112,14 @@ export const AdminDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 lg:p-10">
+      <main className="flex-1 p-6 lg:p-10 overflow-y-auto">
         <h1 className="text-2xl font-bold mb-6">Welcome, Admin</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="bg-white p-6 rounded-lg shadow-sm">
             <p className="text-gray-600 text-sm">Total Users</p>
             <p className="text-3xl font-semibold text-gray-800">{totalUsers}</p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="bg-white p-6 rounded-lg shadow-sm">
             <p className="text-gray-600 text-sm">Total Vendors</p>
             <p className="text-3xl font-semibold text-gray-800">
               {totalVendors}
@@ -126,7 +131,7 @@ export const AdminDashboard = () => {
         <div id="users" className="mt-10">
           <Users />
           {user && selectedUserId && (
-            <UserOrders userId={selectedUserId} /> // Render UserOrders when a user is selected
+            <UserOrders userId={selectedUserId} />
           )}
         </div>
       </main>

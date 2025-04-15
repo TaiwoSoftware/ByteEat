@@ -38,6 +38,38 @@ export interface Database {
           created_at?: string
         }
       }
+      orders: {
+        Row: {
+          id: string
+          user_id: string
+          total_price: number
+          order_status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          total_price: number
+          order_status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          total_price?: number
+          order_status?: string
+          created_at?: string
+        }
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
     }
   }
 }

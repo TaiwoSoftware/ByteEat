@@ -1,81 +1,86 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../Auth/supabaseClient";
-import type { Order } from "../Admin/types/database";
+import { useEffect, useState } from 'react';
+import { supabase } from '../Auth/supabaseClient';
+import type { Database } from '../Auth/database';
+
+type Order = Database['public']['Tables']['orders']['Row'];
 
 interface UserOrdersProps {
-  userId: number; // ✅ Use number instead of string
+  userId: string;
 }
 
 const UserOrders = ({ userId }: UserOrdersProps) => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUserOrders = async () => {
+    const fetchOrders = async () => {
       try {
         setLoading(true);
+        const { data, error: ordersError } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('user_id', userId);
 
-        const { data: ordersData, error: ordersError } = await supabase
-          .from("orders")
-          .select("*")
-          .eq("user_id", userId); // ✅ Using number directly
-
-        if (ordersError) {
-          setError("Error fetching orders: " + ordersError.message);
-          return;
-        }
-
-        setOrders(ordersData ?? []);
+        if (ordersError) throw ordersError;
+        setOrders(data || []);
       } catch (err) {
-        setError(
-          "An error occurred: " +
-            (err instanceof Error ? err.message : String(err))
-        );
+        setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserOrders();
+    fetchOrders();
   }, [userId]);
 
   if (loading) {
-    return <div>Loading orders...</div>;
+    return (
+      <div className="flex justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-red-600">{error}</div>;
+    return (
+      <div className="text-red-600 p-4">
+        {error}
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h4 className="text-lg font-semibold mb-4">Order History</h4>
+    <div className="space-y-4">
       {orders.length === 0 ? (
-        <p>No orders found.</p>
+        <p className="text-gray-500">No orders found for this user.</p>
       ) : (
-        <ul className="space-y-3">
-          {orders.map((order) => (
-            <li
-              key={order.id}
-              className="border p-4 rounded-md shadow-sm bg-gray-50"
-            >
+        orders.map((order) => (
+          <div key={order.id} className="border rounded-lg p-4">
+            <div className="flex justify-between items-center">
               <div>
-                <strong>Order ID:</strong> {order.id}
+                <p className="font-semibold">Order #{order.id}</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(order.created_at).toLocaleDateString()}
+                </p>
               </div>
               <div>
-                <strong>Date:</strong>{" "}
-                {new Date(order.created_at).toLocaleDateString()}
+                <span className="px-3 py-1 rounded-full text-sm font-medium" 
+                      style={{
+                        backgroundColor: order.order_status === 'completed' ? '#DFF7E9' : '#FFF4DE',
+                        color: order.order_status === 'completed' ? '#1F7B4D' : '#946B38'
+                      }}>
+                  {order.order_status}
+                </span>
               </div>
-              <div>
-                {/* <strong>Status:</strong> {order.status} */}
-              </div>
-              <div>
-                <strong>Total:</strong> ${order.total_price.toFixed(2)}
-              </div>
-            </li>
-          ))}
-        </ul>
+            </div>
+            <div className="mt-2">
+              <p className="text-lg font-semibold">
+                ${order.total_price.toFixed(2)}
+              </p>
+            </div>
+          </div>
+        ))
       )}
     </div>
   );

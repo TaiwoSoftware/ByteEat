@@ -1,29 +1,21 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../Auth/supabaseClient";
 import UserOrders from "./UserOrder";
+import type { Database } from '../Auth/database';
 
-// Define types for User and Orders
-interface Order {
-  id: string;
-  created_at: string;
-  total_price: number;
-  order_status: string;
-}
+type Profile = Database['public']['Tables']['profiles']['Row'];
+type Order = Database['public']['Tables']['orders']['Row'];
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  location: string | null;
-  phone_number: string | null;
+interface UserWithOrders extends Omit<Profile, 'phone'> {
+  phone_number: string;
   orders: Order[];
 }
 
 const Users = () => {
-  const [users, setUsers] = useState<User[]>([]); // Type the state as User[]
-  const [error, setError] = useState<string>(""); // Error message is a string
-  const [loading, setLoading] = useState<boolean>(true); // Loading is a boolean
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null); // User ID can be string or null
+  const [users, setUsers] = useState<UserWithOrders[]>([]);
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUsersAndOrders = async () => {
@@ -31,7 +23,7 @@ const Users = () => {
         setLoading(true);
         const { data: usersData, error: usersError } = await supabase
           .from("profiles")
-          .select("id, name, email, location, phone_number");
+          .select("id, user_id, name, email, location, phone_number");
 
         if (usersError) {
           setError("Error fetching users: " + usersError.message);
@@ -47,21 +39,23 @@ const Users = () => {
           usersData.map(async (user) => {
             const { data: ordersData, error: ordersError } = await supabase
               .from("orders")
-              .select("id, created_at, total_price, order_status")
-              .eq("user_id", user.id);
+              .select("id, user_id, created_at, total_price, order_status")
+              .eq("user_id", user.user_id);
 
             if (ordersError) {
               console.error("Error fetching orders for user:", ordersError);
               return {
                 ...user,
-                orders: [], // Ensure we return an empty array in case of an error
-              };
+                created_at: new Date().toISOString(),
+                orders: [] as Order[],
+              } as UserWithOrders;
             }
 
             return {
               ...user,
-              orders: ordersData ?? [], // Ensure empty array if no orders
-            };
+              created_at: new Date().toISOString(),
+              orders: ordersData || [] as Order[],
+            } as UserWithOrders;
           })
         );
 
