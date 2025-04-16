@@ -152,7 +152,7 @@ export const AdminDashboard = () => {
       const { error } = await supabase
         .from("profiles")
         .delete()
-        .eq("id", id);
+        .eq("user_id", id);
 
       if (error) throw error;
 
