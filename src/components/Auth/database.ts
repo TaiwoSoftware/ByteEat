@@ -40,6 +40,7 @@ export interface Database {
       }
       orders: {
         Row: {
+          [x: string]: any
           id: string
           user_id: string
           total_price: number

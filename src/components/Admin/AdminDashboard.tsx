@@ -4,15 +4,13 @@ import { supabase } from "../Auth/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 import Users from "./Users";
 import UserOrders from "./UserOrder";
-// import type { Database } from '../Auth/database';
-
-// type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export const AdminDashboard = () => {
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [totalVendors, setTotalVendors] = useState<number>(0);
-  const [user, setUser] = useState<User | null>(null);
-  const [selectedUserId, ] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [, setUser] = useState<User | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -129,10 +127,8 @@ export const AdminDashboard = () => {
 
         {/* Users Section */}
         <div id="users" className="mt-10">
-          <Users />
-          {user && selectedUserId && (
-            <UserOrders userId={selectedUserId} />
-          )}
+          <Users onSelectUser={(id: string) => setSelectedUserId(id)} />
+          {selectedUserId && <UserOrders userId={selectedUserId} />}
         </div>
       </main>
     </div>
