@@ -35,43 +35,44 @@ export const NewUser: React.FC = () => {
     }));
   };
 
-  const handleSignUp = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-  
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!");
-      setLoading(false);
-      return;
-    }
-  
-    try {
-      // Sign up the user
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-      });
-  
-      if (signUpError) throw signUpError;
-  
-      // ✅ Supabase trigger will handle inserting into profiles
-      // So we don’t do a manual insert anymore
-  
-     
-  
-      // Optionally redirect to login page
-      navigate("/login");
-    } catch (err) {
-      console.error("Supabase Error:", err);
-      setError(
-        err instanceof Error ? err.message : "Registration failed. Please try again."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-  
+  const handleSignUp = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
+
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match!");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    // ✅ Pass profile fields in user_metadata
+    const { error: signUpError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          name: formData.name,
+          location: formData.location,
+          phone_number: formData.phoneNumber,
+        },
+      },
+    });
+
+    if (signUpError) throw signUpError;
+
+    // Profiles table will auto-populate via trigger
+    navigate("/login");
+  } catch (err) {
+    console.error("Supabase Error:", err);
+    setError(err instanceof Error ? err.message : "Registration failed.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-10">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">

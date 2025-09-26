@@ -11,7 +11,12 @@ const Users = ({ onSelectUser }: UsersProps) => {
   useEffect(() => {
     const fetchUsers = async () => {
       const { data, error } = await supabase.from("profiles").select("*");
-      if (!error) setUsers(data ?? []);
+      if (error) {
+        console.error("Error fetching users:", error);
+      } else {
+        console.log("Profiles data:", data); // ✅ Debug
+        setUsers(data ?? []);
+      }
     };
     fetchUsers();
   }, []);
@@ -22,17 +27,21 @@ const Users = ({ onSelectUser }: UsersProps) => {
       <div className="space-y-4">
         {users.map((user) => (
           <div
-            key={user.id}
+            key={user.user_id} // ✅ fixed: use user_id instead of id
             className="flex items-center justify-between border p-4 rounded-md hover:bg-gray-50 transition"
           >
             <div className="flex items-center space-x-4">
               <div>
-                <p className="font-medium text-gray-800">{user.name || "Unnamed User"}</p>
-                <p className="text-sm text-gray-500">{user.email}</p>
+                <p className="font-medium text-gray-800">
+                  {user.name || "Unnamed User"} {/* ✅ fallback if null */}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {user.email || "No email"} {/* ✅ fallback if null */}
+                </p>
               </div>
             </div>
             <button
-              onClick={() => onSelectUser(user.user_id)} // ✅ use auth ID
+              onClick={() => onSelectUser(user.user_id)} // ✅ consistent
               className="text-sm text-blue-600 hover:text-blue-800 font-medium"
             >
               View Orders
