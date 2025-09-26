@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../Auth/supabaseClient";
@@ -47,37 +48,19 @@ export const NewUser: React.FC = () => {
   
     try {
       // Sign up the user
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
       });
   
       if (signUpError) throw signUpError;
   
-      // Get the user ID
-      const userId = signUpData.user?.id;
+      // ✅ Supabase trigger will handle inserting into profiles
+      // So we don’t do a manual insert anymore
   
-      if (!userId) {
-        throw new Error("User ID not found after signup.");
-      }
+     
   
-      // Insert user data into the 'profiles' table
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          user_id: userId,
-          email: formData.email,
-          name: formData.name,
-          location: formData.location,
-          phone_number: formData.phoneNumber,
-        },
-      ]);
-  
-      if (profileError) throw profileError;
-  
-      // Let user know to check their email
-      alert("Check your email to confirm your account before logging in.");
-  
-      // Optionally redirect to login or confirmation page
+      // Optionally redirect to login page
       navigate("/login");
     } catch (err) {
       console.error("Supabase Error:", err);
@@ -89,9 +72,6 @@ export const NewUser: React.FC = () => {
     }
   };
   
-  
-  
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-10">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">

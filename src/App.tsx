@@ -16,6 +16,7 @@ import { Profile } from "./components/Profile/Profile";
 import { CartProvider } from "./components/cart/CartContext";
 import UserSelection from "./components/landing_page/UserSelection";
 import { AdminDashboard } from "./components/Admin/AdminDashboard";
+import { ConfirmEmail } from "./components/Auth/ConfirmEmail";
 // import { TrackOrderPa } from "./components/cart/TrackOrderPage";
 export const App = () => {
   return (
@@ -33,6 +34,7 @@ export const App = () => {
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<ErrorPage />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/confirm" element={<ConfirmEmail />} />
             <Route path="/select" element={<UserSelection />} />
             <Route path="/vendor" element={<VendorsPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
